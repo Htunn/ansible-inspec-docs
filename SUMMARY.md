@@ -7,6 +7,13 @@
 * [Quick Reference](guides/quick-reference.md)
 * [Architecture & How It Works](guides/architecture.md)
 
+## Server Features
+
+* [Server Guide](guides/server.md)
+* [Database Setup](guides/database-setup.md)
+* [Authentication](guides/authentication.md)
+* [VCS Integration](guides/vcs-integration.md)
+
 ## User Guides
 
 * [Real-World Use Cases](guides/real-world-examples.md)

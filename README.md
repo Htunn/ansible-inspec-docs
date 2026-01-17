@@ -4,7 +4,7 @@ Welcome to the **ansible-inspec** documentation! This tool bridges infrastructur
 
 ## What is ansible-inspec?
 
-ansible-inspec is a production-ready tool that transforms how you approach infrastructure compliance. Instead of managing separate tools for automation and compliance testing, ansible-inspec provides a unified workflow that integrates compliance checks directly into your Ansible infrastructure.
+ansible-inspec is an enterprise-ready compliance automation platform that transforms how you approach infrastructure compliance. It provides both a powerful CLI for local testing and a production-grade server with REST API for automated compliance workflows at scale.
 
 ### The Problem It Solves
 
@@ -22,10 +22,26 @@ With ansible-inspec, you:
 - ✅ Convert InSpec profiles to pure Ansible (no InSpec needed!)
 - ✅ Access 100+ pre-built profiles from Chef Supermarket
 - ✅ Run compliance checks in parallel across your entire fleet
+- ✅ **NEW v0.4.0**: Enterprise REST API with job templates and workflows
+- ✅ **NEW v0.4.0**: Azure AD authentication and PostgreSQL database
+- ✅ **NEW v0.4.0**: VCS integration with automatic Git sync
 
 ## Key Features
 
-### 🚀 Three Powerful Modes
+### 🌐 Server Features (v0.4.0)
+
+**Enterprise Compliance Platform**
+- **REST API Server**: FastAPI-based async API for automation
+- **Job Templates**: Reusable compliance check configurations
+- **Workflow Orchestration**: Chain multiple checks together
+- **Azure AD Authentication**: Enterprise SSO with RBAC
+- **PostgreSQL Database**: Scalable storage with Prisma ORM
+- **VCS Integration**: Auto-sync InSpec profiles from Git
+- **Monitoring**: Prometheus metrics and health checks
+
+See [Server Guide](guides/server.md) for complete server documentation.
+
+### 🚀 CLI Features
 
 **1. Native InSpec Execution**
 Run existing InSpec profiles using your Ansible inventory.
@@ -60,7 +76,8 @@ Generate compliance reports in multiple formats:
 
 Available in multiple formats:
 - **PyPI** - `pip install ansible-inspec`
-- **Docker** - Pre-built images with all dependencies
+- **Docker** - Pre-built images with PostgreSQL
+- **Docker Compose** - Full stack deployment (API + Database)
 - **Source** - Install from GitHub for latest features
 
 ### 🔄 InSpec-Free Operation
@@ -73,9 +90,24 @@ Converted collections run with:
 
 ## Quick Start
 
-### Installation
+### Server Deployment (Recommended for Production)
 
-**Option 1: PyPI (Recommended)**
+**Docker Compose:**
+```bash
+git clone https://github.com/Htunn/ansible-inspec.git
+cd ansible-inspec
+cp .env.docker .env
+# Edit .env with your settings
+docker-compose up -d
+docker-compose exec api prisma db push
+curl http://localhost:8080/health
+```
+
+See [Server Guide](guides/server.md), [Database Setup](guides/database-setup.md), and [Authentication](guides/authentication.md).
+
+### CLI Installation
+
+**Option 1: PyPI (Recommended for CLI)**
 ```bash
 pip install ansible-inspec
 ansible-inspec --version
