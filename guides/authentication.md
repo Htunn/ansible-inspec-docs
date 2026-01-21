@@ -1,12 +1,24 @@
-# Azure AD Authentication Setup
+# Authentication Setup
 
-This guide covers setting up Azure AD OAuth2 authentication for ansible-inspec server.
+This guide covers authentication methods for ansible-inspec server.
+
+## Overview
+
+ansible-inspec server supports two authentication methods:
+- **Azure AD OAuth2**: Enterprise SSO for organization-wide access
+- **Local User Authentication**: Username/password for standalone deployments
+
+Both methods provide:
+- 7-day JWT token expiry for extended sessions
+- Automatic session persistence across browser refreshes
+- Secure token storage with HTTP-only cookies
+- Query parameter-based session restoration
 
 ## Prerequisites
 
-- Azure AD tenant
-- Administrator access to register applications
 - ansible-inspec server v0.4.0+
+- For Azure AD: Azure AD tenant and administrator access
+- For local auth: PostgreSQL database configured
 
 ## Azure AD App Registration
 
@@ -186,13 +198,129 @@ For multi-tenant (cross-organization) access:
 
 ## Security Best Practices
 
-1. **Rotate secrets regularly** (every 3-6 months)
-2. **Use short-lived tokens** (30 minutes for access tokens)
-3. **Enable refresh token rotation**
-4. **Store secrets in environment variables** (never commit to git)
-5. **Use Azure Key Vault** for production secret management
-6. **Enable MFA** for all administrative users
-7. **Monitor authentication logs** in Azure AD
+1. **Token Management**
+   - Tokens expire after 7 days for security balance
+   - Sessions automatically restore from secure cookies or URL tokens
+   - Users can logout manually to invalidate tokens immediately
+
+2. **Secret Rotation**
+   - Rotate Azure client secrets regularly (every 3-6 months)
+   - Update JWT secret key periodically
+   - Use strong, randomly-generated secrets
+
+3. **Secure Storage**
+   - Secrets stored in environment variables (never in git)
+   - Use Azure Key Vault for production
+   - HTTP-only cookies prevent XSS attacks
+
+4. **Access Control**
+   - Enable MFA for all administrative users
+   - Use role-based access control (RBAC)
+   - Monitor authentication logs in Azure AD
+
+5. **Network Security**
+   - Use HTTPS in production
+   - Configure secure cookie settings
+   - Set SameSite cookie attribute to prevent CSRF
+
+## Session Persistence
+
+The server implements a multi-layered session persistence strategy:
+
+### Token Storage Methods
+
+1. **Browser Session State** (Primary)
+   - Tokens stored in Streamlit session_state during active use
+   - Persists across page navigation within session
+   - Cleared when browser tab closes
+
+2. **HTTP Cookies** (Backup)
+   - 7-day expiry aligns with token lifetime
+   - HTTP-only prevents JavaScript access
+   - Secure flag in production (HTTPS only)
+   - SameSite=lax prevents CSRF attacks
+
+3. **URL Query Parameters** (Restore)
+   - Token passed as `?token=xxx` after login
+   - Automatically extracted on page load
+   - Cleared from URL after extraction for security
+   - Enables session restoration after refresh
+
+### Session Flow
+
+```mermaid
+sequenceDiagram
+    participant Browser
+    participant Streamlit
+    participant API
+
+    Note over Browser,API: Login Flow
+    Browser->>API: POST /auth/password-login
+    API-->>Browser: Set-Cookie + Redirect ?token=xxx
+    Browser->>Streamlit: GET /?token=xxx
+    Streamlit->>Streamlit: Extract token to session_state
+    Streamlit->>Streamlit: Clear URL parameter
+    Streamlit-->>Browser: Show Dashboard
+
+    Note over Browser,API: Refresh Flow
+    Browser->>Streamlit: GET / (cookie sent)
+    Streamlit->>Streamlit: Check session_state
+    alt Token in session
+        Streamlit-->>Browser: Show Dashboard
+    else No token
+        Streamlit->>Streamlit: Check cookie via query param
+        Streamlit-->>Browser: Redirect ?token=xxx
+    end
+```
+
+### Configuration
+
+```bash
+# .env file
+AUTH__ACCESS_TOKEN_EXPIRE_MINUTES=10080  # 7 days
+AUTH__COOKIE_NAME=ansible_inspec_token
+AUTH__COOKIE_HTTPONLY=false  # Allow JS read for Streamlit
+AUTH__COOKIE_SECURE=true     # HTTPS only in production
+AUTH__COOKIE_SAMESITE=lax    # CSRF protection
+```
+
+## Local User Authentication
+
+### Creating Users
+
+Users are created via the API or database initialization:
+
+```bash
+# Via API (requires admin token)
+curl -X POST http://localhost:8080/api/v1/users \
+  -H "Authorization: Bearer $ADMIN_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "username": "john.doe",
+    "email": "john@example.com",
+    "name": "John Doe",
+    "password": "secure-password",
+    "roles": ["user"]
+  }'
+```
+
+### Default Admin Account
+
+The server creates a default admin account on first run:
+- Username: `admin`
+- Password: Set via `DEFAULT_ADMIN_PASSWORD` environment variable
+- Roles: `["admin"]`
+
+**Important**: Change the default password immediately in production!
+
+### Password Requirements
+
+- Minimum 8 characters
+- Bcrypt hashing with salt
+- Stored securely in PostgreSQL
+- Password reset requires admin intervention (API call)
+
+## Azure AD OAuth2 Setup
 
 ## References
 

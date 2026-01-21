@@ -12,6 +12,7 @@
 * [Server Guide](guides/server.md)
 * [Database Setup](guides/database-setup.md)
 * [Authentication](guides/authentication.md)
+* [Session Management](guides/session-management.md)
 * [VCS Integration](guides/vcs-integration.md)
 
 ## User Guides
