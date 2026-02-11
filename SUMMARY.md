@@ -15,13 +15,17 @@
 * [Session Management](guides/session-management.md)
 * [VCS Integration](guides/vcs-integration.md)
 
+## Deployment
+
+* [Kubernetes & Helm](guides/kubernetes.md)
+* [Docker Usage](guides/docker.md)
+
 ## User Guides
 
 * [Real-World Use Cases](guides/real-world-examples.md)
 * [Chef Supermarket Integration](guides/chef-supermarket.md)
 * [Profile Conversion](guides/profile-conversion.md)
 * [Reporter Modes](guides/reporter-modes.md)
-* [Docker Usage](guides/docker.md)
 
 ## Reference
 
