@@ -22,13 +22,13 @@ With ansible-inspec, you:
 - ✅ Convert InSpec profiles to pure Ansible (no InSpec needed!)
 - ✅ Access 100+ pre-built profiles from Chef Supermarket
 - ✅ Run compliance checks in parallel across your entire fleet
-- ✅ **NEW v0.4.0**: Enterprise REST API with job templates and workflows
-- ✅ **NEW v0.4.0**: Azure AD authentication and PostgreSQL database
-- ✅ **NEW v0.4.0**: VCS integration with automatic Git sync
+- ✅ Enterprise REST API with job templates and workflows
+- ✅ Azure AD authentication and PostgreSQL database
+- ✅ VCS integration with automatic Git sync
 
 ## Key Features
 
-### 🌐 Server Features (v0.4.0)
+### 🌐 Server Features
 
 **Enterprise Compliance Platform**
 - **REST API Server**: FastAPI-based async API for automation
