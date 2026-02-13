@@ -5,14 +5,97 @@ This guide covers authentication methods for ansible-inspec server.
 ## Overview
 
 ansible-inspec server supports two authentication methods:
+- **Local Password Authentication**: Username/password with bcrypt hashing (v0.2.9+)
 - **Azure AD OAuth2**: Enterprise SSO for organization-wide access
-- **Local User Authentication**: Username/password for standalone deployments
 
 Both methods provide:
+- Secure bcrypt password hashing for local accounts
 - 7-day JWT token expiry for extended sessions
 - Automatic session persistence across browser refreshes
 - Secure token storage with HTTP-only cookies
 - Query parameter-based session restoration
+
+## Local Password Authentication
+
+ansible-inspec v0.2.9+ includes secure local password authentication with bcrypt hashing.
+
+### Server Configuration
+
+#### Using Environment Variables
+
+```bash
+# Enable authentication
+AUTH__ENABLED=true
+
+# Admin user credentials
+ADMIN_USERNAME=admin
+ADMIN_PASSWORD=SecureAdminPass123!
+ADMIN_EMAIL=admin@yourdomain.com
+ADMIN_NAME=Administrator
+
+# JWT settings
+AUTH__JWT_SECRET=your-random-secret-key-here
+AUTH__JWT_ALGORITHM=HS256
+AUTH__ACCESS_TOKEN_EXPIRE_MINUTES=30
+AUTH__REFRESH_TOKEN_EXPIRE_DAYS=7
+```
+
+#### Using Helm Chart
+
+```bash
+helm install ansible-inspec ansible-inspec/ansible-inspec \\\n  --set secrets.adminUsername=admin \\\n  --set secrets.adminPassword=SecureAdminPass123! \\\n  --set secrets.adminEmail=admin@yourdomain.com \\\n  --set secrets.adminName=Administrator
+```
+
+Or in `values.yaml`:
+
+```yaml
+secrets:
+  # Admin user credentials (REQUIRED for password login)
+  adminUsername: \"admin\"
+  adminPassword: \"ChangeThisSecurePassword123!\"  # CHANGE THIS!
+  adminEmail: \"admin@yourdomain.com\"
+  adminName: \"Administrator\"
+  
+  # JWT secret for token signing
+  jwtSecret: \"your-jwt-secret\"
+```
+
+### Password Security Features
+
+- **Bcrypt Hashing**: Passwords stored with bcrypt + salt (never plain text)
+- **Auto-Update**: Existing users without passwords are automatically updated on server startup
+- **Secure Verification**: Constant-time password comparison prevents timing attacks
+
+### Login via Streamlit UI
+
+1. Navigate to the Streamlit UI
+2. Select \"Local Account Login\" from the sidebar
+3. Enter your username and password
+4. Click \"Login\"
+5. Upon success, you'll be redirected to the main dashboard
+
+### Login via API
+
+```bash
+curl -X POST http://localhost:8080/api/v1/auth/password-login \\\n  -H \"Content-Type: application/json\" \\\n  -d '{
+    \"username\": \"admin\",
+    \"password\": \"SecureAdminPass123!\"
+  }'
+```
+
+Response:
+```json
+{
+  \"access_token\": \"eyJ0eXAiOiJKV1QiLCJhbGc...\",
+  \"token_type\": \"bearer\",
+  \"user\": {
+    \"id\": 1,
+    \"username\": \"admin\",
+    \"email\": \"admin@yourdomain.com\",
+    \"roles\": [\"admin\"]
+  }
+}
+```
 
 ## Prerequisites
 

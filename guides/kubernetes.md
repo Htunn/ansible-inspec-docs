@@ -106,7 +106,7 @@ cat > my-values.yaml <<'EOF'
 # Image configuration
 image:
   repository: ghcr.io/htunn/ansible-inspec
-  tag: "latest"  # Use specific version in production: "0.2.6"
+  tag: "0.2.10"  # Use specific version in production
   pullPolicy: IfNotPresent
 
 # Scaling
@@ -164,7 +164,7 @@ config:
     oauthRedirectUri: "https://ansible-inspec.yourdomain.com/api/v1/auth/callback"
     streamlitUiUrl: "https://ansible-inspec.yourdomain.com"
     
-    # Azure AD OAuth2
+    # Azure AD OAuth2 (optional for SSO)
     azureTenantId: "your-tenant-id"
     azureClientId: "your-client-id"
   
@@ -176,6 +176,13 @@ config:
 
 # Secrets (use external secret management in production)
 secrets:
+  # Admin user credentials (REQUIRED for local password authentication)
+  # IMPORTANT: Change these values for production!
+  adminUsername: "admin"
+  adminPassword: "ChangeThisSecurePassword123!"
+  adminEmail: "admin@yourdomain.com"
+  adminName: "Administrator"
+  
   # PostgreSQL password
   postgresPassword: "changeme-strong-password"
   
